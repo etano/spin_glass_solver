@@ -1,9 +1,3 @@
-#include <string>
-#include <iostream>
-#include <cassert>
-
-#include "hamiltonian.hpp"
-#include "result.hpp"
 #include "sa_solver.hpp"
 
 int main(int argc, char* argv[]) {
@@ -12,38 +6,17 @@ int main(int argc, char* argv[]) {
 //        beta1 is the ending temperature of SA (use 3.0 for bimodal instances)
 //        Ns is the number of Monte Carlo Sweeps within each run of SA
 //        num_rep is the number of repetitions of SA (with different seeds)
-//        inputfile is the filename describing the Hamiltonian
-//        outputfile is the file all the results are written
-//
-// Output: All written into outputfile (Energy and spin configuration for each repetition)
-//
-// Note: Seed of SA is the repetition number
 
-  assert(argc == 7);
+  hamiltonian_type& H = *(hamiltonian_type*)argv[1];
+  property_type& P = *(property_type*)argv[2];
 
-  const std::string infile(argv[1]);
-  const std::string outfile(argv[2]);
-  const unsigned Ns(std::stoul(argv[3]));
-  const double beta0(std::stod(argv[4]));
-  const double beta1(std::stod(argv[5]));
-  const unsigned num_rep(std::stoul(argv[6]));
+  const unsigned Ns = P.get_param<unsigned>("nsweeps");
+  const double beta0 = P.get_param<double>("b0");
+  const double beta1 = P.get_param<double>("b1");
+  const unsigned seed = P.get_seed();
 
-  const hamiltonian_type H(infile);
+  auto res = solve(H,beta0,beta1,Ns,seed);
+  P.set_cfg(res.spins_,res.E_);
 
-  std::ofstream out(outfile);
-
-  out
-    << "# infile=" + infile
-    + " Ns=" + std::to_string(Ns)
-    + " beta0=" + std::to_string(beta0)
-    + " beta1=" + std::to_string(beta1)
-    + " num_rep=" + std::to_string(num_rep)
-    << std::endl;
-
-  for(unsigned rep = 0; rep < num_rep; ++rep)
-    out << solve(H,beta0,beta1,Ns,rep);
-
-  out.close();
-  
   return 0;
 }

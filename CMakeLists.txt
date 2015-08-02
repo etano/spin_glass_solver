@@ -31,24 +31,26 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
 endif()
 
 #--------------------------------------------------
-# Library
+# WhiplashDB
 #--------------------------------------------------
-add_library(solver STATIC 
-  src/result.cpp 
-  src/hamiltonian.cpp 
-  src/sa_solver.cpp
-)
+include(FindPkgConfig)
+pkg_check_modules(MONGOCXX REQUIRED libmongocxx)
+include_directories($ENV{WDB_HOME}/src ${MONGOCXX_INCLUDE_DIRS})
+link_directories(${MONGOCXX_LIBRARY_DIRECTORIES} /Users/ethan/lib)
+link_libraries(dl)
+set(WDB_FLAGS "-w -Wfatal-errors -fPIC -shared")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WDB_FLAGS}")
 
 #--------------------------------------------------
 # Exe
 #--------------------------------------------------
 add_executable(main src/main.cpp)
-target_link_libraries(main solver)
+target_link_libraries(main ${MONGOCXX_LIBRARIES})
 
 #--------------------------------------------------
 # Install
 #--------------------------------------------------
-install(TARGETS main solver
+install(TARGETS main
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
