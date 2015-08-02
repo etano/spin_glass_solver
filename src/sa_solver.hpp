@@ -25,7 +25,6 @@ public:
   {
   }
 
-
   //single run of sa from random initial state on hamiltonian H_
   result run(const double beta0,
              const double beta1,
